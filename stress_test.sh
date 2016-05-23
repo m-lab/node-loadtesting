@@ -1,16 +1,25 @@
 #!/bin/bash
-SERVER=ndt.iupui.mlab2v4.nuq0t.measurement-lab.org
-PORT=4649
-SSL_PORT=4659
-COUNT=1000
+SERVER=$1
+PORT=3001
+SSL_PORT=3010
+COUNT=$2
 STOP=
-
 OUTDIR=stress_test_results
+NUMBER_REGEX='^[0-9]+$'
+
+if [ -z $SERVER ]; then
+  echo "error: no NDT server specified" >&2
+  echo "usage: $0 server count"
+  exit 1
+elif ! [[ $COUNT =~ $NUMBER_REGEX ]]; then
+  echo "error: count is not a number: [$COUNT]" >&2
+  echo "usage: $0 server count"
+  exit 1
+fi
 
 function stopall {
   STOP=true
 }
-
 
 function run_cmd_tests {
   trap stopall SIGINT SIGTERM
@@ -42,7 +51,6 @@ function run_cmd_tests {
   done
 }
 
-
 function run_ws_tests {
   run_cmd_tests ws node ./ndt_client.js --server=${SERVER} --port=${PORT} --protocol=ws --debug
 }
@@ -54,7 +62,6 @@ function run_wss_tests {
 function run_raw_tests {
   run_cmd_tests raw web100clt --disablemid --disablesfw -n ${SERVER} -p ${PORT} -ddddd
 }
-
 
 #while /bin/true; do
   run_ws_tests &
@@ -79,5 +86,4 @@ function run_raw_tests {
   run_raw_tests &
   run_raw_tests &
   wait
-
 #done
