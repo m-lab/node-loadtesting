@@ -12,7 +12,8 @@ curl https://raw.githubusercontent.com/m-lab/ndt/master/src/node_tests/ndt_clien
 
 ## Running tests
 
-To run an NDT stress test in the testbed for 1,000 iterations:
+To run an NDT stress test in the testbed for 1,000 iterations (21,000 NDT
+tests):
  * start an NDT server
  * run `./stress_test.sh ndt.iupui.mlab3.iad0t.measurement-lab.org 1000 &`
  * run `./killer.sh &`

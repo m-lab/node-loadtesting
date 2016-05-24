@@ -1,4 +1,25 @@
 #!/bin/bash
+#
+# Runs a stress test against an NDT server. To do this, the script launches
+# several NDT clients simultaneously to run NDT tests against the specified NDT
+# server.
+#
+# To run:
+#
+#   ./stress_test.sh SERVER COUNT
+#
+# SERVER - Address of NDT server to stress test
+# COUNT - Number of stress test iterations to run. Each stress test iteration
+#   runs 7 simultaneous tests in each of 3 NDT clients, so each stress test
+#   iteration results in 21 NDT tests.
+#
+# For example:
+#
+#   ./stress_test.sh ndt.iupui.mlab3.iad0t.measurement-lab.org 1000
+#
+# This will run 1,000 stress test iterations (21,000 NDT tests) against the
+# target NDT server.
+
 SERVER=$1
 PORT=3001
 SSL_PORT=3010
@@ -9,11 +30,11 @@ NUMBER_REGEX='^[0-9]+$'
 
 if [ -z $SERVER ]; then
   echo "error: no NDT server specified" >&2
-  echo "usage: $0 server count"
+  echo "usage: $0 SERVER COUNT"
   exit 1
 elif ! [[ $COUNT =~ $NUMBER_REGEX ]]; then
   echo "error: count is not a number: [$COUNT]" >&2
-  echo "usage: $0 server count"
+  echo "usage: $0 SERVER COUNT"
   exit 1
 fi
 
