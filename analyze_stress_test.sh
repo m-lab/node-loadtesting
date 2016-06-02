@@ -1,13 +1,14 @@
 #!/bin/bash
 
-ANALYSIS_FILE="./stress_test_analysis.txt"
+CLIENT_LOGS="./stress_test_results"
+ANALYSIS_FILE="stress_test_analysis.txt"
 WS_PROTOS="ws wss"
 C_CLIENT="raw"
 
 cat /dev/null > $ANALYSIS_FILE
 
 for ws_proto in $WS_PROTOS; do
-    pushd $ws_proto > /dev/null
+    pushd $CLIENT_LOGS/$ws_proto > /dev/null
 
     FAILED_TESTS=$(grep -l -L 'TESTS FINISHED SUCCESSFULLY' *)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
@@ -35,7 +36,7 @@ EOF
     popd > /dev/null
 done
 
-pushd $C_CLIENT > /dev/null
+pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
     FAILED_TESTS=$(grep -l -L 'Exited with code 0' *)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
     ZERO_SECS=$(grep 'Ran for N seconds' $FAILED_TESTS | awk '{if ($5 == 0) print}' | wc -l)
