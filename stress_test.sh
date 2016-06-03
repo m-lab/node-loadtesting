@@ -73,11 +73,11 @@ function run_cmd_tests {
 }
 
 function run_ws_tests {
-  run_cmd_tests ws node ./ndt_client.js --server=${SERVER} --port=${PORT} --protocol=ws --debug
+  run_cmd_tests ws nodejs ./ndt_client.js --server=${SERVER} --port=${PORT} --protocol=ws --debug
 }
 
 function run_wss_tests {
-  run_cmd_tests wss node ./ndt_client.js --server=${SERVER} --port=${SSL_PORT} --protocol=wss --acceptinvalidcerts --debug
+  run_cmd_tests wss nodejs ./ndt_client.js --server=${SERVER} --port=${SSL_PORT} --protocol=wss --acceptinvalidcerts --debug
 }
 
 function run_raw_tests {
