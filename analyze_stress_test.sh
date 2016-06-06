@@ -5,7 +5,7 @@ ANALYSIS_FILE="stress_test_analysis.txt"
 WS_PROTOS="ws wss"
 C_CLIENT="raw"
 
-cat /dev/null > $ANALYSIS_FILE
+cat /dev/null > $CLIENT_LOGS/$ANALYSIS_FILE
 
 for ws_proto in $WS_PROTOS; do
     pushd $CLIENT_LOGS/$ws_proto > /dev/null
