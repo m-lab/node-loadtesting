@@ -20,6 +20,7 @@
 # This will run 1,000 stress test iterations (21,000 NDT tests) against the
 # target NDT server.
 
+DATE=`date +%Y%m%d-%T`
 SERVER=$1
 PORT=3001
 SSL_PORT=3010
@@ -36,6 +37,11 @@ elif ! [[ $COUNT =~ $NUMBER_REGEX ]]; then
   echo "error: count is not a number: [$COUNT]" >&2
   echo "usage: $0 SERVER COUNT"
   exit 1
+fi
+
+if [ -e $OUTDIR ]; then
+  echo "$OUTDIR already exists. Renaming to $OUTDIR.$DATE. You're welcome!"
+  mv $OUTDIR $OUTDIR.$DATE
 fi
 
 function stopall {
@@ -56,7 +62,7 @@ function run_cmd_tests {
   while [ $X -lt $COUNT ]; do
      X=$[$X + 1]
      ts=$(date --utc +%Y%m%dT%H:%M:%S.%N)
-     tmpfile=stress_test_results/${kind}/${kind}.${ts}
+     tmpfile=${OUTDIR}/${kind}/${kind}.${ts}
      ts_start=$(date +%s)
      $cmd >> ${tmpfile} 2>&1
      echo Exited with code $? >> ${tmpfile}
