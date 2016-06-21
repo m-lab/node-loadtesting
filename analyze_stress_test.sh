@@ -10,7 +10,10 @@ cat /dev/null > $CLIENT_LOGS/$ANALYSIS_FILE
 for ws_proto in $WS_PROTOS; do
     pushd $CLIENT_LOGS/$ws_proto > /dev/null
 
-    FAILED_TESTS=$(grep -l -L 'TESTS FINISHED SUCCESSFULLY' *)
+    TOTAL_TESTS=$(ls | wc -l)
+    TESTS_KILLED_COUNT=$(grep -l 'Exited with code 137' * | wc -l)
+    TESTS_NOT_KILLED=$(grep -L 'Exited with code 137' *)
+    FAILED_TESTS=$(grep -L 'TESTS FINISHED SUCCESSFULLY' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
     ZERO_SECS=$(grep 'Ran for N seconds' * | awk '{if ($5 == 0) print}' | wc -l)
     DIED_C2S_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'C2S type 3' | wc -l)
@@ -18,10 +21,10 @@ for ws_proto in $WS_PROTOS; do
     DIED_S2C_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 3' | wc -l)
     DIED_S2C_START=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 4' | wc -l)
     DIED_S2C_MSG=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 5' | wc -l)
-    CONN_REFUSED=$(grep 'ECONNREFUSED' * | wc -l)
+    CONN_REFUSED=$(grep 'ECONNREFUSED' $TESTS_NOT_KILLED | wc -l)
 
 
-    cat <<EOF >> ../$ANALYSIS_FILE
+    tee -a ../$ANALYSIS_FILE <<EOF 
 Protocol: $ws_proto
     Total failed tests: $TOTAL_FAILURES
     Failed immediately (ran for 0 seconds): $ZERO_SECS
@@ -31,13 +34,18 @@ Protocol: $ws_proto
     Died at S2C TEST_START: $DIED_S2C_START
     Died at S2C TEST_MSG: $DIED_S2C_MSG
     Connection refused: $CONN_REFUSED
+    Total tests run: $TOTAL_TESTS
+    Tests killed: $TESTS_KILLED_COUNT
 
 EOF
     popd > /dev/null
 done
 
 pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
-    FAILED_TESTS=$(grep -l -L 'Exited with code 0' *)
+    TOTAL_TESTS=$(ls | wc -l)
+    TESTS_KILLED_COUNT=$(grep -l 'Exited with code 137' * | wc -l)
+    TESTS_NOT_KILLED=$(grep -L 'Exited with code 137' *)
+    FAILED_TESTS=$(grep -L 'Exited with code 0' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
     ZERO_SECS=$(grep 'Ran for N seconds' $FAILED_TESTS | awk '{if ($5 == 0) print}' | wc -l)
     DIED_C2S=$(grep '^running 10\.0s outbound test.*Exited with code 137$' $FAILED_TESTS | wc -l)
@@ -45,7 +53,7 @@ pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
     DIED_CLIENT_SOCK=$(grep -B 1 'Exited with code 137' $FAILED_TESTS | grep 'network\.c:355 \] Client socket created' | wc -l)
     PROTO_ERRORS=$(grep -l 'Protocol error' $FAILED_TESTS | wc -l)
     CONN_REFUSED=$(grep 'Connection refused' $FAILED_TESTS | wc -l)
-    cat <<EOF >> ../$ANALYSIS_FILE
+    tee -a ../$ANALYSIS_FILE <<EOF
 Protocol: $C_CLIENT
     Total failed tests: $TOTAL_FAILURES
     Failed immediately (ran for 0 seconds): $ZERO_SECS
@@ -54,5 +62,8 @@ Protocol: $C_CLIENT
     Died at client socket created (network.c:355): $DIED_CLIENT_SOCK
     Protocol error: $PROTO_ERRORS
     Connection refused: $CONN_REFUSED
+    Total tests run: $TOTAL_TESTS
+    Total tests run: $TOTAL_TESTS
+    Tests killed: $TESTS_KILLED_COUNT
 EOF
 popd > /dev/null
