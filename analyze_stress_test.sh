@@ -21,8 +21,8 @@ for ws_proto in $WS_PROTOS; do
     DIED_S2C_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 3' | wc -l)
     DIED_S2C_START=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 4' | wc -l)
     DIED_S2C_MSG=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 5' | wc -l)
-    CONN_REFUSED=$(grep 'ECONNREFUSED' $TESTS_NOT_KILLED | wc -l)
-
+    CONN_REFUSED=$(grep 'ECONNREFUSED' * | wc -l)
+    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TOTAL_TESTS*100" | bc)
 
     tee -a ../$ANALYSIS_FILE <<EOF 
 Protocol: $ws_proto
@@ -34,8 +34,9 @@ Protocol: $ws_proto
     Died at S2C TEST_START: $DIED_S2C_START
     Died at S2C TEST_MSG: $DIED_S2C_MSG
     Connection refused: $CONN_REFUSED
-    Total tests run: $TOTAL_TESTS
     Tests killed: $TESTS_KILLED_COUNT
+    Total tests run: $TOTAL_TESTS
+    Percent failed tests: $PERCENT_FAILED%
 
 EOF
     popd > /dev/null
@@ -53,6 +54,7 @@ pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
     DIED_CLIENT_SOCK=$(grep -B 1 'Exited with code 137' $FAILED_TESTS | grep 'network\.c:355 \] Client socket created' | wc -l)
     PROTO_ERRORS=$(grep -l 'Protocol error' $FAILED_TESTS | wc -l)
     CONN_REFUSED=$(grep 'Connection refused' $FAILED_TESTS | wc -l)
+    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TOTAL_TESTS*100" | bc)
     tee -a ../$ANALYSIS_FILE <<EOF
 Protocol: $C_CLIENT
     Total failed tests: $TOTAL_FAILURES
@@ -62,8 +64,9 @@ Protocol: $C_CLIENT
     Died at client socket created (network.c:355): $DIED_CLIENT_SOCK
     Protocol error: $PROTO_ERRORS
     Connection refused: $CONN_REFUSED
-    Total tests run: $TOTAL_TESTS
-    Total tests run: $TOTAL_TESTS
     Tests killed: $TESTS_KILLED_COUNT
+    Total tests run: $TOTAL_TESTS
+    Percent failed tests: $PERCENT_FAILED%
+
 EOF
 popd > /dev/null
