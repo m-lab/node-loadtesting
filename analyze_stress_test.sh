@@ -12,8 +12,8 @@ for ws_proto in $WS_PROTOS; do
 
     TOTAL_TESTS=$(ls | wc -l)
     TESTS_KILLED_COUNT=$(grep -l 'Exited with code 137' * | wc -l)
-    TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
     TESTS_NOT_KILLED=$(grep -L 'Exited with code 137' *)
+    TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
     FAILED_TESTS=$(grep -L 'TESTS FINISHED SUCCESSFULLY' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
     ZERO_SECS=$(grep 'Ran for N seconds' * | awk '{if ($5 == 0) print}' | wc -l)
@@ -47,8 +47,8 @@ done
 pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
     TOTAL_TESTS=$(ls | wc -l)
     TESTS_KILLED_COUNT=$(grep -l 'Exited with code 137' * | wc -l)
-    TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
     TESTS_NOT_KILLED=$(grep -L 'Exited with code 137' *)
+    TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
     FAILED_TESTS=$(grep -L 'Exited with code 0' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
     ZERO_SECS=$(grep 'Ran for N seconds' $FAILED_TESTS | awk '{if ($5 == 0) print}' | wc -l)
