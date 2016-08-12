@@ -16,14 +16,25 @@ for ws_proto in $WS_PROTOS; do
     TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
     FAILED_TESTS=$(grep -L 'TESTS FINISHED SUCCESSFULLY' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
-    ZERO_SECS=$(grep 'Ran for N seconds' * | awk '{if ($5 == 0) print}' | wc -l)
-    DIED_C2S_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'C2S type 3' | wc -l)
-    DIED_C2S_START=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'C2S type 4' | wc -l)
-    DIED_S2C_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 3' | wc -l)
-    DIED_S2C_START=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 4' | wc -l)
-    DIED_S2C_MSG=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 5' | wc -l)
-    CONN_REFUSED=$(grep 'ECONNREFUSED' * | wc -l)
-    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT*100" | bc)
+    if [ "$TOTAL_FAILURES" -gt 0 ]; then
+        ZERO_SECS=$(grep 'Ran for N seconds' * | awk '{if ($5 == 0) print}' | wc -l)
+        DIED_C2S_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'C2S type 3' | wc -l)
+        DIED_C2S_START=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'C2S type 4' | wc -l)
+        DIED_S2C_PREPARE=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 3' | wc -l)
+        DIED_S2C_START=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 4' | wc -l)
+        DIED_S2C_MSG=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS | grep 'CALLED S2C with 5' | wc -l)
+        CONN_REFUSED=$(grep 'ECONNREFUSED' * | wc -l)
+        PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT*100" | bc)
+    else
+        ZERO_SECS=0
+        DIED_C2S_PREPARE=0
+        DIED_C2S_START=0
+        DIED_S2C_PREPARE=0
+        DIED_S2C_START=0
+        DIED_S2C_MSG=0
+        CONN_REFUSED=0
+        PERCENT_FAILED=0
+    fi
 
     tee -a ../$ANALYSIS_FILE <<EOF 
 Protocol: $ws_proto
@@ -51,13 +62,24 @@ pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
     TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
     FAILED_TESTS=$(grep -L 'Exited with code 0' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
-    ZERO_SECS=$(grep 'Ran for N seconds' $FAILED_TESTS | awk '{if ($5 == 0) print}' | wc -l)
-    DIED_C2S=$(grep '^running 10\.0s outbound test.*Exited with code 137$' $FAILED_TESTS | wc -l)
-    DIED_S2C=$(grep '^running 10\.0s inbound test.*Exited with code 137$' $FAILED_TESTS | wc -l)
-    DIED_CLIENT_SOCK=$(grep -B 1 'Exited with code 137' $FAILED_TESTS | grep 'network\.c:355 \] Client socket created' | wc -l)
-    PROTO_ERRORS=$(grep -l 'Protocol error' $FAILED_TESTS | wc -l)
-    CONN_REFUSED=$(grep 'Connection refused' $FAILED_TESTS | wc -l)
-    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT*100" | bc)
+    if [ "$TOTAL_FAILURES" -gt 0 ]; then
+        ZERO_SECS=$(grep 'Ran for N seconds' $FAILED_TESTS | awk '{if ($5 == 0) print}' | wc -l)
+        DIED_C2S=$(grep '^running 10\.0s outbound test.*Exited with code 137$' $FAILED_TESTS | wc -l)
+        DIED_S2C=$(grep '^running 10\.0s inbound test.*Exited with code 137$' $FAILED_TESTS | wc -l)
+        DIED_CLIENT_SOCK=$(grep -B 1 'Exited with code 137' $FAILED_TESTS | grep 'network\.c:355 \] Client socket created' | wc -l)
+        PROTO_ERRORS=$(grep -l 'Protocol error' $FAILED_TESTS | wc -l)
+        CONN_REFUSED=$(grep 'Connection refused' $FAILED_TESTS | wc -l)
+        PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT*100" | bc)
+    else
+        ZERO_SECS=0
+        DIED_C2S=0
+        DIED_S2C=0
+        DIED_CLIENT_SOCK=0
+        PROTO_ERRORS=0
+        CONN_REFUSED=0
+        PERCENT_FAILED=0
+    fi
+
     tee -a ../$ANALYSIS_FILE <<EOF
 Protocol: $C_CLIENT
     Total failed tests: $TOTAL_FAILURES
