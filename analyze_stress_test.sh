@@ -14,6 +14,9 @@ for ws_proto in $WS_PROTOS; do
     TESTS_KILLED_COUNT=$(grep -l 'Exited with code 137' * | wc -l)
     TESTS_NOT_KILLED=$(grep -L 'Exited with code 137' *)
     TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
+    TESTS_GOT_SRV_QUEUE=$(grep -l 'SRV_QUEUE' * | wc -l)
+    AVERAGE_C2S=$(grep 'Measured upload rate' * | awk '{count++; sum += $5;} END {print (sum/count)/1000}')
+    AVERAGE_S2C=$(grep 'Measured download rate' * | awk '{count++; sum += $5;} END {print (sum/count)/1000}')
     FAILED_TESTS=$(grep -L 'TESTS FINISHED SUCCESSFULLY' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
     if [ "$TOTAL_FAILURES" -gt 0 ]; then
@@ -49,6 +52,9 @@ Protocol: $ws_proto
     Total tests run: $TOTAL_TESTS
       Tests killed: $TESTS_KILLED_COUNT
       Tests not killed: $TESTS_NOT_KILLED_COUNT
+      Test that got SRV_QUEUE: $TESTS_GOT_SRV_QUEUE
+      Average C2S throughput: $AVERAGE_C2S Mbps
+      Average S2C throughput: $AVERAGE_S2C Mbps
     Percent failed tests: $PERCENT_FAILED%  ($TOTAL_FAILURES out of $TESTS_NOT_KILLED_COUNT)
 
 EOF
@@ -60,8 +66,11 @@ pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
     TESTS_KILLED_COUNT=$(grep -l 'Exited with code 137' * | wc -l)
     TESTS_NOT_KILLED=$(grep -L 'Exited with code 137' *)
     TESTS_NOT_KILLED_COUNT=$(grep -L 'Exited with code 137' * | wc -l)
+    TESTS_GOT_SRV_QUEUE=$(grep -l 'Another client is currently begin served' * | wc -l)
     FAILED_TESTS=$(grep -L 'Exited with code 0' $TESTS_NOT_KILLED)
     TOTAL_FAILURES=$(echo $FAILED_TESTS | wc -w)
+    AVERAGE_C2S=$(for log in *; do awk '/[0-9]+\.[0-9]+ Mb\/s/{i++; if (i==1) print $1 }' $log; done | awk '{count++; sum += $1} END {print sum/count}')
+    AVERAGE_S2C=$(for log in *; do awk '/[0-9]+\.[0-9]+ Mb\/s/{i++; if (i==2) print $1 }' $log; done | awk '{count++; sum += $1} END {print sum/count}')
     if [ "$TOTAL_FAILURES" -gt 0 ]; then
         ZERO_SECS=$(grep 'Ran for N seconds' $FAILED_TESTS | awk '{if ($5 == 0) print}' | wc -l)
         DIED_C2S=$(grep '^running 10\.0s outbound test.*Exited with code 137$' $FAILED_TESTS | wc -l)
@@ -92,6 +101,9 @@ Protocol: $C_CLIENT
     Total tests run: $TOTAL_TESTS
       Tests killed: $TESTS_KILLED_COUNT
       Tests not killed: $TESTS_NOT_KILLED_COUNT
+      Test that got SRV_QUEUE: $TESTS_GOT_SRV_QUEUE
+      Average C2S throughput: $AVERAGE_C2S Mbps
+      Average S2C throughput: $AVERAGE_S2C Mbps
     Percent failed tests: $PERCENT_FAILED%  ($TOTAL_FAILURES out of $TESTS_NOT_KILLED_COUNT)
 
 EOF

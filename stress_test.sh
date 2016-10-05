@@ -6,16 +6,17 @@
 #
 # To run:
 #
-#   ./stress_test.sh SERVER COUNT
+#   ./stress_test.sh SERVER PROTOCOL COUNT
 #
-# SERVER - Address of NDT server to stress test
+# SERVER - Short name of NDT server to stress test (e.g., mlab2.iad0t)
+# PROTOCOL - One of 'ipv4' or 'ipv6'.
 # COUNT - Number of stress test iterations to run. Each stress test iteration
 #   runs 7 simultaneous tests in each of 3 NDT clients, so each stress test
 #   iteration results in 21 NDT tests.
 #
 # For example:
 #
-#   ./stress_test.sh ndt.iupui.mlab3.iad0t.measurement-lab.org 1000
+#   ./stress_test.sh mlab3.iad0t ipv4 1000 &
 #
 # This will run 1,000 stress test iterations (21,000 NDT tests) against the
 # target NDT server.
@@ -24,25 +25,43 @@ DATE=`date +%Y%m%d-%T`
 SERVER=$1
 PORT=3001
 SSL_PORT=3010
-COUNT=$2
+PROTOCOL=$2
+COUNT=$3
 STOP=
 OUTDIR=stress_test_results
 NUMBER_REGEX='^[0-9]+$'
 
+function usage {
+  echo "usage: $0 SERVER PROTOCOL COUNT"
+}
+
 if [ -z $SERVER ]; then
   echo "error: no NDT server specified" >&2
-  echo "usage: $0 SERVER COUNT"
+  usage
+  exit 1
+elif ! [[ $PROTOCOL =~ ipv4|ipv6 ]]; then
+  echo "error: protocol must be either ipv4 or ipv6" >&2
+  usage
   exit 1
 elif ! [[ $COUNT =~ $NUMBER_REGEX ]]; then
   echo "error: count is not a number: [$COUNT]" >&2
-  echo "usage: $0 SERVER COUNT"
+  usage
   exit 1
 fi
 
+SERVER="ndt.iupui.${SERVER}.measurement-lab.org"
+if [ $PROTOCOL = 'ipv4' ]; then
+  SERVER=$(echo $SERVER | sed -e 's/\(mlab.\)/\1v4/')
+else 
+  SERVER=$(echo $SERVER | sed -e 's/\(mlab.\)/\1v6/')
+fi
+
+OUTDIR="${OUTDIR}-${PROTOCOL}"
 if [ -e $OUTDIR ]; then
   echo "$OUTDIR already exists. Renaming to $OUTDIR.$DATE. You're welcome!"
   mv $OUTDIR $OUTDIR.$DATE
 fi
+
 
 function stopall {
   STOP=true

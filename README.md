@@ -12,11 +12,13 @@ curl https://raw.githubusercontent.com/m-lab/ndt/master/src/node_tests/ndt_clien
 
 ## Running tests
 
-To run an NDT stress test in the testbed for 1,000 iterations (21,000 NDT
-tests):
+To run an NDT stress test in the testbed for 1,000 iterations using IPv4
+(21,000 NDT tests):
  * start an NDT server
- * run `./stress_test.sh ndt.iupui.mlab3.iad0t.measurement-lab.org 1000 &`
+ * run `./stress_test.sh mlab3.iad0t ipv4 1000 &`
  * run `./killer.sh &`
+
+For IPv6, change 'ipv4' in the example above to 'ipv6'
 
 ## Don't run out of disk space on the server.
 
@@ -41,7 +43,7 @@ There should be no running or deadlocked NDT processes.
 ### Count the client logs
 
 ```bash
-ls stress_test_results/*/* | wc
+ls stress_test_results-<ipversion>/*/* | wc
 ```
 
 ### Analyze the client logs
@@ -49,12 +51,14 @@ ls stress_test_results/*/* | wc
 The script `analyze_stress_test.sh` is meant to help compile some basic
 statistics about failures for each protocol type (ws, wss, raw). It does *not*
 tell you *why* a test failed, but merely at roughly which point in the test the
-failed occurred. Client log files for a stress test are placed in directories named
-`./stress_test_results/<protocol>`.  The analysis script can be run as follows,
-and will drop a summary of the results at
-`./stress_test_results/stress_test_analysis.txt.`
+failed occurred. Client log files for a stress test are placed in directories
+named `./stress_test_results-<ipversion>/<protocol>`.  The analysis script can
+be run as follows, and will drop a summary of the results at
+`./stress_test_results-<ipversion>/stress_test_analysis.txt.`
 
-`$ ./analyze_stress_test.sh`
+`$ ./analyze_stress_test.sh <client-log-directory>`
+
+If omitted, &lt;client-log-directory&gt; will default to `stress_test_results-ipv4`
 
 ### General information on client logs
 
