@@ -51,12 +51,15 @@ ls stress_test_results-<ipversion>/*/* | wc
 The script `analyze_stress_test.sh` is meant to help compile some basic
 statistics about failures for each protocol type (ws, wss, raw). It does *not*
 tell you *why* a test failed, but merely at roughly which point in the test the
-failed occurred. Client log files for a stress test are placed in directories
+failure occurred. Client log files for a stress test are placed in directories
 named `./stress_test_results-<ipversion>/<protocol>`.  The analysis script can
-be run as follows, and will drop a summary of the results at
-`./stress_test_results-<ipversion>/stress_test_analysis.txt.`
+be run as follows:
 
 `$ ./analyze_stress_test.sh <client-log-directory>`
+
+It will drop a summary of the results at:
+
+`./stress_test_results-<ipversion>/stress_test_analysis.txt.`
 
 If omitted, &lt;client-log-directory&gt; will default to `stress_test_results-ipv4`
 
