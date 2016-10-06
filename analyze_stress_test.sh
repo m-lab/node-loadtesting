@@ -1,6 +1,10 @@
 #!/bin/bash
 
-CLIENT_LOGS="./stress_test_results"
+if [ -n "$1" ];then
+    CLIENT_LOGS="$1"
+else
+    CLIENT_LOGS="stress_test_results-ipv4"
+fi
 ANALYSIS_FILE="stress_test_analysis.txt"
 WS_PROTOS="ws wss"
 C_CLIENT="raw"
