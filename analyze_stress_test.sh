@@ -38,8 +38,8 @@ for ws_proto in $WS_PROTOS; do
     DIED_S2C_MSG=$(grep -B 5 'Ran for N seconds' $FAILED_TESTS \
       | grep 'CALLED S2C with 5' | wc -l)
     CONN_REFUSED=$(grep 'ECONNREFUSED' * | wc -l)
-    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT*100" \
-      | bc)
+    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT \
+      *100" | bc)
   else
     ZERO_SECS=0
     DIED_C2S_PREPARE=0
@@ -98,8 +98,8 @@ pushd $CLIENT_LOGS/$C_CLIENT > /dev/null
       | grep 'network\.c:355 \] Client socket created' | wc -l)
     PROTO_ERRORS=$(grep -l 'Protocol error' $FAILED_TESTS | wc -l)
     CONN_REFUSED=$(grep 'Connection refused' $FAILED_TESTS | wc -l)
-    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT*100" \
-      | bc)
+    PERCENT_FAILED=$(echo "scale=4;$TOTAL_FAILURES/$TESTS_NOT_KILLED_COUNT \
+      *100" | bc)
   else
     ZERO_SECS=0
     DIED_C2S=0
