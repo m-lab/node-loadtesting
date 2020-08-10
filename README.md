@@ -9,12 +9,16 @@
 
 On the M-Lab sandbox node, run something like the following:
 
-`# docker run --rm --workdir=/root/bin --net=host --tty \`
-`    measurementlab/node-loadtesting:v1.0.0 ./run.sh 50 250 10`
+```
+# docker run --rm --workdir=/root/bin --net=host --tty \
+    measurementlab/node-loadtesting:v1.0.0 ./run.sh 50 250 10
+```
 
 run.sh accepts five arguments, the first three of which are required:
 
-`./run.sh <start> <stop> <step> <server> <period>`
+```
+./run.sh <start> <stop> <step> <server> <period>
+```
 
 Option descriptions:
 
