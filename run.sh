@@ -6,7 +6,7 @@
 START=${1:?Please provide number of clients to run}
 STOP=${2:?Please provide max clients}
 STEP=${3:?Please provide step size}
-TARGET=${4:-ndt-iupui-mlab3v4-lga0t.measurement-lab.org}
+TARGET=${4:-ndt-iupui-mlab3v4-lga0t.mlab-sandbox.measurement-lab.org}
 PERIOD=${5:-360}
 
 function runUntil() {
@@ -51,4 +51,3 @@ while true ; do
       CURRENT=$START
     fi
 done
-

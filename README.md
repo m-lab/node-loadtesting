@@ -1,94 +1,23 @@
-# NDT Stress Test
+# NDT Load Test
 
 ## Pre-Requisites
 
-1. `web100clt` must be in the user's `PATH`
-1. A current version of `ndt_client.js` must be in the local directory:
-
-```bash
-curl https://raw.githubusercontent.com/m-lab/ndt/master/src/node_tests/ndt_client.js \
-  -o ndt_client.js
-```
+* Access to at least one M-Lab sandbox node from which you will launch the load test.
 
 ## Running tests
 
-To run an NDT stress test in the testbed for 1,000 iterations using IPv4
-(21,000 NDT tests):
- * start an NDT server
- * run `./stress_test.sh mlab3.iad0t ipv4 1000 &`
- * run `./killer.sh &`
+On the M-Lab sandbox node, run something like the following:
 
-For IPv6, change 'ipv4' in the example above to 'ipv6'
+`# docker run --rm --workdir=/root/bin --net=host --tty measurementlab/node-loadtesting:v1.0.0 ./run.sh 50 250 10`
 
-## Don't run out of disk space on the server.
+run.sh accepts five arguments, the first three of which are required:
 
-If the stress test does not need to preserve server-collected data, and to
-avoid running out of disk space during the test, start the following on the ndt
-server. This will remove log files older than 10 minutes.
+`./run.sh <start> <stop> <step> <server> <period>`
 
-```bash
-while /bin/true; do
-  find /var/spool/iupui_ndt/$(date +%Y)/ -mmin +10 -a -type f \
-    -a -exec rm -f {} \;
-  sleep 600
-done &
-```
+Option descriptions:
 
-## After testing
-
-### Check the server
-
-There should be no running or deadlocked NDT processes.
-
-### Count the client logs
-
-```bash
-ls stress_test_results-<ipversion>/*/* | wc
-```
-
-### Analyze the client logs
-
-The script `analyze_stress_test.sh` is meant to help compile some basic
-statistics about failures for each protocol type (ws, wss, raw). It does *not*
-tell you *why* a test failed, but merely at roughly which point in the test the
-failure occurred. Client log files for a stress test are placed in directories
-named `./stress_test_results-<ipversion>/<protocol>`.  The analysis script can
-be run as follows:
-
-`$ ./analyze_stress_test.sh <client-log-directory>`
-
-It will drop a summary of the results at:
-
-`./stress_test_results-<ipversion>/stress_test_analysis.txt.`
-
-If omitted, &lt;client-log-directory&gt; will default to `stress_test_results-ipv4`
-
-### General information on client logs
-
-Processes exit with code 137 (128 + 9) when `killer.sh` kills them. So, skip
-these files when looking for errors.
-
-To find all `ws` and `wss` tests without successful upload & download tests:
-NOTE: as of this writing, `node ndt_client.js` stil returns exit status `0` on
-error states.
-
-```bash
-for file in `grep -L 'Exited with code 137' *` ; do
-  awk 'BEGIN { up=0 ; down=0 ; }
-    /Measured download/ {down=$5}
-    /Measured upload/ {up=$5}
-    END {
-      if (up > 0 && down > 0) {
-      print "ok";
-      } else {
-      print FILENAME;
-      }
-    }' $file | grep -v ok
-done
-```
-
-To find all `raw` tests without successful tests:
-
-```bash
-grep -L 'Exited with code 0' * | xargs grep -L 'Exited with code 137'
-```
+* _\<start\>_: The initial/starting number of concurrent NDT clients to launch against _server_.
+* _\<stop\>_: The maximum number of concurrent tests to launch against _server_.
+* _\<step\>_: Increments the number of concurrent tests against _\<server\>_ by this amount each _\<period\>_ from _\<start\>_ until _\<stop\>_ count is reached.
+* _\<server\>_: The server to run the tests against. Default: mlab3v4-lga0t.mlab-sandbox.measurement-lab.org.
+* _\<period\>_: The amount of time to run each incremental number of concurrent tests before adding _\<step\>_ more concurrent tests.
